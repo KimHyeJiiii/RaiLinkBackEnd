@@ -16,6 +16,41 @@ namespace RailLinkBackEnd.Controllers
             _context = context;
         }
 
+        [HttpGet("{receptNo}")]
+        public async Task<IActionResult> GetHistoryDetail(
+            [FromRoute] string receptNo,
+            CancellationToken cancellationToken)
+        {
+            var history = await _context.Histories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.ReceptNo == receptNo,
+                    cancellationToken);
+
+            if (history is null)
+            {
+                return NotFound(new
+                {
+                    message = "해당 견적번호의 견적서를 찾을 수 없습니다.",
+                    receptNo
+                });
+            }
+
+            return Ok(new
+            {
+                history.Seq,
+                history.ReceptNo,
+                InputJson = JsonSerializer.Deserialize<JsonElement>(history.InputJson),
+                OutputJson = JsonSerializer.Deserialize<JsonElement>(history.OutputJson),
+                history.EntDateTime,
+                history.recommendedMode,
+                history.costChangeRate,
+                history.carbonReductionRate,
+                history.OriginName,
+                history.DestinationName
+            });
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetHistory(
             [FromQuery] string? keyword,
