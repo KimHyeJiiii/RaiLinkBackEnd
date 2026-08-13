@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RailLinkBackEnd.Entity;
 using System.Reflection.Emit;
 
 namespace RailLinkBackEnd.Supabase

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace RailLinkBackEnd.Supabase 
+namespace RailLinkBackEnd.Entity 
 { 
     /// <summary>
     /// 운송안 생성 결과 히스토리
