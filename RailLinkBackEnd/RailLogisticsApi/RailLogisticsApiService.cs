@@ -32,8 +32,12 @@ namespace RailLinkBackEnd.RailLogisticsApi
             Console.WriteLine(
                 $"[RailLogisticsApiService] Response: {rawBody}");
 
-            // 200번대가 아니면 예외 발생
-            response.EnsureSuccessStatusCode();
+            // 200번대가 아니면 본문을 담아서 커스텀 예외 발생
+            // 기존: response.EnsureSuccessStatusCode();  ← 본문을 버리는 문제가 있어 교체
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new RailApiException(response.StatusCode, rawBody);
+            }
 
             // 응답이 비어있는 경우
             if (string.IsNullOrWhiteSpace(rawBody))

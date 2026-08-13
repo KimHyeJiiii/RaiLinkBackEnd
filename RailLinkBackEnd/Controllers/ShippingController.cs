@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using RailLinkBackEnd.Entity;
 using RailLinkBackEnd.RailLogisticsApi;
 using RailLinkBackEnd.Supabase;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+
 namespace RailLinkBackEnd.Controllers
 {
     [ApiController]
@@ -97,9 +97,30 @@ namespace RailLinkBackEnd.Controllers
                     });
                 }
 
-
                 // 5. 프론트에 결과 반환
                 return Ok(result);
+            }
+            catch (RailApiException ex)
+            {
+                // Rail AI API가 4xx/5xx로 응답한 경우 → 원문 그대로 프론트에 전달
+                object errorDetail;
+                try
+                {
+                    errorDetail = JsonSerializer.Deserialize<object>(ex.ResponseBody)!;
+                }
+                catch
+                {
+                    errorDetail = ex.ResponseBody;
+                }
+
+                Console.WriteLine(
+                    $"[ShippingController] Rail API 오류: {ex.StatusCode} / {ex.ResponseBody}");
+
+                return StatusCode((int)ex.StatusCode, new
+                {
+                    message = "AI 분석 서버에서 오류를 반환했습니다.",
+                    detail = errorDetail
+                });
             }
             catch (Exception ex)
             {
