@@ -1,0 +1,6 @@
+@RailLinkBackEnd_HostAddress = http://localhost:5296
+
+GET {{RailLinkBackEnd_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
