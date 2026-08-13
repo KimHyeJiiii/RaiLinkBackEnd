@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RailLinkBackEnd.Supabase;
+using System.Text.Json;
 
 namespace RailLinkBackEnd.Controllers
 {
@@ -108,7 +109,21 @@ namespace RailLinkBackEnd.Controllers
                     .ThenByDescending(x => x.Seq)
             };
 
-            var histories = await query.ToListAsync();
+            var historyEntities = await query.ToListAsync();
+
+            var histories = historyEntities.Select(x => new
+            {
+                x.Seq,
+                x.ReceptNo,
+                InputJson = JsonSerializer.Deserialize<JsonElement>(x.InputJson),
+                OutputJson = JsonSerializer.Deserialize<JsonElement>(x.OutputJson),
+                x.EntDateTime,
+                x.recommendedMode,
+                x.costChangeRate,
+                x.carbonReductionRate,
+                x.OriginName,
+                x.DestinationName
+            });
 
             return Ok(histories);
         }
