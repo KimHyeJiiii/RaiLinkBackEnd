@@ -102,24 +102,32 @@ namespace RailLinkBackEnd.Controllers
             }
             catch (RailApiException ex)
             {
-                // Rail AI API가 4xx/5xx로 응답한 경우 → 원문 그대로 프론트에 전달
-                object errorDetail;
+                // FastAPI HTTPException은 항상 {"detail": "메시지"} 형태로 옴
+                // detail.detail처럼 중첩되지 않도록 여기서 바로 꺼냄
+                string errorMessage = ex.ResponseBody;
+
                 try
                 {
-                    errorDetail = JsonSerializer.Deserialize<object>(ex.ResponseBody)!;
+                    using var doc = JsonDocument.Parse(ex.ResponseBody);
+                    if (doc.RootElement.TryGetProperty("detail", out var detailElement))
+                    {
+                        errorMessage = detailElement.ValueKind == JsonValueKind.String
+                            ? detailElement.GetString()!
+                            : detailElement.GetRawText();
+                    }
                 }
                 catch
                 {
-                    errorDetail = ex.ResponseBody;
+                    // JSON 파싱 실패 시 원문 그대로 사용
                 }
 
                 Console.WriteLine(
-                    $"[ShippingController] Rail API 오류: {ex.StatusCode} / {ex.ResponseBody}");
+                    $"[ShippingController] Rail API 오류: {ex.StatusCode} / {errorMessage}");
 
                 return StatusCode((int)ex.StatusCode, new
                 {
                     message = "AI 분석 서버에서 오류를 반환했습니다.",
-                    detail = errorDetail
+                    detail = errorMessage   // ← 이제 문자열 하나로 깔끔하게 나감
                 });
             }
             catch (Exception ex)
