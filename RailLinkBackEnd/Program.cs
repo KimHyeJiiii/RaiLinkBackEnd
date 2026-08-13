@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RailLinkBackEnd.RailLogisticsApi;
 using RailLinkBackEnd.Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("SupabaseConnection")));
+builder.Services.AddHttpClient<RailLogisticsApiService>(); //철도api
+
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
